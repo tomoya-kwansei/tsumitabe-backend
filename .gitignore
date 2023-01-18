@@ -2,3 +2,5 @@ __pycache__/
 venv/
 db.sqlite3
 .env
+api/migrations/*.py
+!api/migrations/__init__.py
