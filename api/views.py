@@ -8,4 +8,6 @@ from .serializers import UserSerializer
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (permissions.IsAuthenticated, )
+
+    # TODO: のちに認証を必要とする設計へ変更
+    # permission_classes = (permissions.IsAuthenticated, )
