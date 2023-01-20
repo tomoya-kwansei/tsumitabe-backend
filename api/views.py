@@ -13,8 +13,7 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-    # TODO: のちに認証を必要とする設計へ変更
-    # permission_classes = (permissions.IsAuthenticated, )
+    permission_classes = (permissions.IsAuthenticated, )
 
 
 class LoginView(View):
