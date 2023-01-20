@@ -1,3 +1,5 @@
+import json
+
 from django.test import TestCase
 from rest_framework.test import APITestCase, force_authenticate
 
@@ -31,10 +33,37 @@ class UserSerializerTests(TestCase):
 class UserViewSetTests(APITestCase):
     def test_access_from_not_authenticated_user(self):
         response = self.client.get('/api/users/')
-        self.assertEqual(200, response.status_code)
+        self.assertEqual(response.status_code, 200)
 
     def test_access_from_authenticated_user(self):
         user = UserFactory.create()
         self.client.force_authenticate(user)
         response = self.client.get('/api/users/')
-        self.assertEqual(200, response.status_code)
+        self.assertEqual(response.status_code, 200)
+
+
+class AuthenticateViewTest(APITestCase):
+    def test_get_by_not_authenticated_user(self):
+        response = self.client.get('/api/login/')
+        self.assertEqual(response.status_code, 401)
+
+    def test_get_by_authenticated_user(self):
+        PASSWORD = "aaaaaaa"
+        user = UserFactory.create()
+        user.set_password(PASSWORD)
+        user.save()
+        self.client.login(email=user.email, password=PASSWORD)
+        response = self.client.get('/api/login/')
+        self.assertEqual(response.status_code, 200)
+    
+    def test_post_by_not_authenticated_user(self):
+        PASSWORD = "aaaaaaa"
+        user = UserFactory.create()
+        user.set_password(PASSWORD)
+        user.save()
+        response = self.client.post('/api/login/', 
+        data=json.dumps({
+            "email": user.email,
+            "password": PASSWORD
+        }), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
