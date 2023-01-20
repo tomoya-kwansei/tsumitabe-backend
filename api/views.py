@@ -1,5 +1,9 @@
+import json
+
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.views.generic import View
+from django.http import HttpResponse, JsonResponse
+from django.contrib.auth import authenticate, login, logout
 
 from rest_framework import viewsets, permissions
 from .models import *
@@ -11,3 +15,18 @@ class UserViewSet(viewsets.ModelViewSet):
 
     # TODO: のちに認証を必要とする設計へ変更
     # permission_classes = (permissions.IsAuthenticated, )
+
+
+class LoginView(View):
+    def get(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return HttpResponse("認証されていないユーザです", status=401)
+        return JsonResponse(UserSerializer(request.user).data, status=200)
+
+    def post(self, request, *args, **kwargs):
+        params = json.loads(request.body)
+        user = authenticate(email=params["email"], password=params["password"])
+        if user == None:
+            return HttpResponse("正しいメールアドレスまたはパスワードを入力してください。", status=401)
+        login(request, user)
+        return HttpResponse("ログインに成功しました", status=200)

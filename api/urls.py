@@ -9,3 +9,5 @@ defaultRouter.register('users', UserViewSet)
 
 urlpatterns = []
 urlpatterns += defaultRouter.urls
+
+urlpatterns += path(r'login/', LoginView.as_view(), name="login"),
