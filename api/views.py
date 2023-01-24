@@ -5,7 +5,7 @@ from django.views.generic import View
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth import authenticate, login, logout
 
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, authentication
 from .models import *
 from .serializers import UserSerializer
 
@@ -19,6 +19,8 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class LoginView(View):
+    permission_classes = (permissions.IsAuthenticated, )
+
     def get(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return HttpResponse("認証されていないユーザです", status=401)
