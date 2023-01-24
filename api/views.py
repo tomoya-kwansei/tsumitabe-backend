@@ -9,6 +9,8 @@ from rest_framework import viewsets, permissions
 from .models import *
 from .serializers import UserSerializer
 
+from django.middleware.csrf import get_token
+
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -29,3 +31,8 @@ class LoginView(View):
             return HttpResponse("正しいメールアドレスまたはパスワードを入力してください。", status=401)
         login(request, user)
         return HttpResponse("ログインに成功しました", status=200)
+
+
+class CSRFTokenView(View):
+    def get(self, request, *args, **kwargs):
+        return HttpResponse(get_token(request), status=200)
