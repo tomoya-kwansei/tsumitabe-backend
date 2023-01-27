@@ -1,6 +1,7 @@
 import json
 
 from django.test import TestCase
+from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase, force_authenticate
 
 from .serializers import *
@@ -31,14 +32,40 @@ class UserSerializerTests(TestCase):
 
 
 class UserViewSetTests(APITestCase):
+    def setUp(self):
+        UserFactory.create_batch(50, email=factory.Sequence(lambda n: 'testemail%d@example.com' % n))
+
     def test_access_from_not_authenticated_user(self):
         response = self.client.get('/api/users/')
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 401)
 
     def test_access_from_authenticated_user(self):
         user = UserFactory.create()
         self.client.force_authenticate(user)
         response = self.client.get('/api/users/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_item_from_not_authenticated_user(self):
+        user = UserFactory.create()
+        response = self.client.get(f'/api/users/{user.id}/')
+        self.assertEqual(response.status_code, 401)
+
+    def test_get_item_from_authenticated_user(self):
+        user = UserFactory.create()
+        self.client.force_authenticate(user)
+        response = self.client.get(f'/api/users/{user.id}/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_list_from_with_token(self):
+        user = UserFactory.create()
+        token = Token.objects.create(user=user)
+        response = self.client.get(f'/api/users/', HTTP_AUTHORIZATION=f"Token {token.key}")
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_item_from_authenticated_user(self):
+        user = UserFactory.create()
+        token = Token.objects.create(user=user)
+        response = self.client.get(f'/api/users/{user.id}/', HTTP_AUTHORIZATION=f"Token {token.key}")
         self.assertEqual(response.status_code, 200)
 
 
