@@ -31,9 +31,12 @@ class UserSerializerTests(TestCase):
 
 
 class UserViewSetTests(APITestCase):
+    def setUp(self):
+        UserFactory.create_batch(50, email=factory.Sequence(lambda n: 'testemail%d@example.com' % n))
+
     def test_access_from_not_authenticated_user(self):
         response = self.client.get('/api/users/')
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 401)
 
     def test_access_from_authenticated_user(self):
         user = UserFactory.create()
