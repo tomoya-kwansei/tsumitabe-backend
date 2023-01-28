@@ -22,14 +22,6 @@ class UserSerializerTests(TestCase):
         self.assertFalse(ser.is_valid())
         self.assertTrue("email" in ser.errors)
 
-    # def test_create_user_with_empty_password(self):
-    #     user_data = UserFactory.build()
-    #     user_data.password = ""
-    #     user_json = UserSerializer(user_data).data
-    #     ser = UserSerializer(data=user_json)
-    #     self.assertFalse(ser.is_valid())
-    #     self.assertTrue("password" in ser.errors)
-
 
 class UserViewSetTests(APITestCase):
     def setUp(self):
@@ -82,15 +74,21 @@ class AuthenticateViewTest(APITestCase):
         self.client.login(email=user.email, password=PASSWORD)
         response = self.client.get('/api/login/')
         self.assertEqual(response.status_code, 200)
-    
+
+    def test_get_by_authenticated_user_with_token(self):
+        user = UserFactory.create()
+        token = Token.objects.create(user=user)
+        response = self.client.get(f'/api/users/', HTTP_AUTHORIZATION=f"Token {token.key}")
+        self.assertEqual(response.status_code, 200)
+
     def test_post_by_not_authenticated_user(self):
         PASSWORD = "aaaaaaa"
         user = UserFactory.create()
         user.set_password(PASSWORD)
         user.save()
         response = self.client.post('/api/login/', 
-        data=json.dumps({
-            "email": user.email,
-            "password": PASSWORD
-        }), content_type='application/json')
+            data=json.dumps({
+                "email": user.email,
+                "password": PASSWORD
+            }), content_type='application/json')
         self.assertEqual(response.status_code, 200)
